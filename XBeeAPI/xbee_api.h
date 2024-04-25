@@ -67,7 +67,9 @@ void xbee_api_preconfigure_buffer(uint8_t type, uint16_t len) {
 	xbee_api_buffer[3] = type;
 }
 
-bool xbee_api_read_api_packet() {
+// Returns the length of the packet
+// (excluding the four bytes at the beginning and end)
+uint16_t xbee_api_read_api_packet() {
 	int count = 0;
 	uint16_t len = 0;
 	while(true) {
@@ -75,7 +77,7 @@ bool xbee_api_read_api_packet() {
 
 		switch(count) {
 			case 0: {
-				if(data != 0x7E) return false;
+				if(data != 0x7E) return 0;
 				break;
 			}
 			case 1: {
@@ -84,6 +86,9 @@ bool xbee_api_read_api_packet() {
 			}
 			case 2: {
 				len = (len << 8) | data;
+				// This technically represents a security risk,
+				// because it is possible that the length bytes are corrupted
+				xbee_api_ensure_buffer_capacity(len);
 				break;
 			}
 		}
@@ -93,7 +98,11 @@ bool xbee_api_read_api_packet() {
 		if(count == (len + 4)) break;
 	}
 
-	return xbee_api_verify_checksum();
+	if(xbee_api_verify_checksum()) {
+		return len;
+	} else {
+		return 0;
+	}
 }
 
 void xbee_api_send_AT(char* at_command, char* value, uint8_t value_len) {
@@ -195,6 +204,46 @@ void xbee_api_transmit_data(char* data, uint16_t data_len, uint64_t address) {
 	}
 }
 
-void xbee_api_receive_data() {
+bool xbee_api_receive_data(uint8_t** output_data, uint16_t* output_len, uint64_t* sender_addr) {
+	int len = xbee_api_read_api_packet();
 
+	if(!len) return false;
+
+	// 0x90 corresponds to a Receive Packet; if not a receive packet,
+	// return false
+	if(xbee_api_buffer[3] != 0x90) return false;
+
+	// With packet in memory, read off meaningful information
+
+	// Read in the 64-bit address
+	uint64_t address_64bit = 0;
+	for(int i = 0; i < 8; i++) {
+		// The 64-bit address has an offset of 4
+		address_64bit = (address_64bit << 8) | (0xFF & xbee_api_buffer[i + 4]);
+	}
+
+	// Read in the 16-bit address (unused for now)
+	uint16_t address_16bit = 0;
+	for(int i = 0; i < 2; i++) {
+		// The 16-bit address has an offset of 12
+		address_16bit = (address_16bit << 8) | (0xFF & xbee_api_buffer[i + 12]);
+	}
+
+	// This contains various information about the packet, but is currently unused
+	uint8_t receive_options = xbee_api_buffer[14];
+
+	// With all packets read in, output to pointers
+
+	// Len does not account for the four bytes in at the beginning and end
+	// Need to remove:
+	// 1 byte for start delimiter
+	// 2 bytes for length
+	// 1 byte for frame type
+	// 8 bytes for 64-bit address
+	// 2 bytes for 16-bit address
+	// 1 byte for receive options
+	// 1 byte for checksum
+	*output_len = (len + 4) - (1 + 2 + 1 + 8 + 2 + 1 + 1);
+	*output_data = &(xbee_api_buffer[15]); // The offset of the packet in the buffer
+	*sender_addr = address_64bit;
 }
