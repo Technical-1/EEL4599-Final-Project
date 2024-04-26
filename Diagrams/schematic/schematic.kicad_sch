@@ -1,0 +1,65 @@
+(kicad_sch (version 20230121) (generator eeschema)
+
+  (uuid b3bc2386-4b71-4f4d-8850-5283d3c53cad)
+
+  (paper "A4")
+
+  (lib_symbols
+  )
+
+
+  (sheet (at 121.285 29.845) (size 45.72 50.165) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 0 0 0 0.0000))
+    (uuid 7f032c87-202b-47e1-9f78-2fc3e405b74f)
+    (property "Sheetname" "TempNode" (at 121.285 29.1334 0)
+      (effects (font (size 1.27 1.27)) (justify left bottom))
+    )
+    (property "Sheetfile" "TempNode.kicad_sch" (at 121.285 80.5946 0)
+      (effects (font (size 1.27 1.27)) (justify left top))
+    )
+    (instances
+      (project "schematic"
+        (path "/b3bc2386-4b71-4f4d-8850-5283d3c53cad" (page "3"))
+      )
+    )
+  )
+
+  (sheet (at 59.055 93.345) (size 45.085 59.055) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 0 0 0 0.0000))
+    (uuid d3ac0d76-8ef3-4cd1-84ed-ea61dfae7829)
+    (property "Sheetname" "BaseNode" (at 59.055 92.6334 0)
+      (effects (font (size 1.27 1.27)) (justify left bottom))
+    )
+    (property "Sheetfile" "BaseNode.kicad_sch" (at 59.055 152.9846 0)
+      (effects (font (size 1.27 1.27)) (justify left top))
+    )
+    (instances
+      (project "schematic"
+        (path "/b3bc2386-4b71-4f4d-8850-5283d3c53cad" (page "4"))
+      )
+    )
+  )
+
+  (sheet (at 43.815 29.21) (size 50.165 52.705) (fields_autoplaced)
+    (stroke (width 0.1524) (type solid))
+    (fill (color 0 0 0 0.0000))
+    (uuid dc88a5c0-7cbc-40b6-9698-a91ef59bab40)
+    (property "Sheetname" "LightNode" (at 43.815 28.4984 0)
+      (effects (font (size 1.27 1.27)) (justify left bottom))
+    )
+    (property "Sheetfile" "LightNode.kicad_sch" (at 43.815 82.4996 0)
+      (effects (font (size 1.27 1.27)) (justify left top))
+    )
+    (instances
+      (project "schematic"
+        (path "/b3bc2386-4b71-4f4d-8850-5283d3c53cad" (page "2"))
+      )
+    )
+  )
+
+  (sheet_instances
+    (path "/" (page "1"))
+  )
+)

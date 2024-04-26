@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "RPico_Configurable")(type "KiCad")(uri "${KIPRJMOD}/RPico_Configurable.kicad_sym")(options "")(descr ""))
+)

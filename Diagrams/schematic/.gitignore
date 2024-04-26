@@ -1,0 +1,10 @@
+*-backups/
+*.wbk
+*.lck
+*.raw
+*.plt
+*.bak
+\#auto_saved_files\#
+fp-info-cache
+production/
+*.log
