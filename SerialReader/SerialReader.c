@@ -28,7 +28,7 @@ void handle_data(uint8_t data) {
 		// Output the payload
 		uint16_t temp = (payload[0] << 8) | (payload[1]);
 
-		printf("The temperature is: %.01f\n", ((float)temp) / 10);
+		printf("The lux is: %.01f\n", ((float)temp) / 10);
 
 		idx = 0;
 		payload_count = 0;
@@ -39,7 +39,7 @@ void handle_data(uint8_t data) {
 }
 
 int main() {
-	int fd = open("/dev/ttyACM1",O_RDWR | O_NOCTTY);// | O_NDELAY);
+	int fd = open("/dev/ttyACM0",O_RDWR | O_NOCTTY);// | O_NDELAY);
 
 	if(fd == -1) {
 		printf("Could not open serial device\n");
