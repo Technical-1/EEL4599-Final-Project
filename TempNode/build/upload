@@ -1,3 +1,4 @@
 #!/bin/sh
-sudo mount $(sudo fdisk -l | grep 128M | grep W95 | awk '{print $1}') /mnt/ram/drive -o uid=1000
-cp main.uf2 /mnt/ram/drive
+#sudo mount $(sudo fdisk -l | grep 128M | grep W95 | awk '{print $1}') /mnt/ram/drive -o uid=1000
+#cp main.uf2 /mnt/ram/drive
+sudo openocd -f interface/cmsis-dap.cfg -f target/rp2040.cfg -c "adapter speed 5000" -c "program main.elf verify reset exit"

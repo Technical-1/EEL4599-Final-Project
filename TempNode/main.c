@@ -3,6 +3,7 @@
 
 #include "hardware/uart.h"
 #include "hardware/adc.h"
+#include <math.h>
 
 #define UART uart0
 #define BAUD_RATE 9600
@@ -22,6 +23,23 @@ uint8_t xbee_api_uart_getchar() {
 }
 
 #include "xbee_api.h"
+
+// Compute the resistance using the voltage divider equation,
+// recall that ADC is 12-bit and using 10k resistor in divider
+float compute_resistance(float adc_value) {
+	return 7.3e3 * (( (1 << 12) / adc_value ) - 1);
+}
+
+// Compute the temperature, in Fahrenheit
+float compute_temperature(float R) {
+	static const float B = 3435;
+	static const float T0 = 25 + 273.15; // In Kelvin
+	static const float R0 = 10e3;
+
+	const float temp_K = 1 / (1 / T0 + 1/B * log(R / R0));
+	const float temp_C = temp_K - 273.15;
+	return (9 * temp_C) / 5 + 32;
+}
 
 int main() {
 	stdio_init_all();
@@ -44,11 +62,30 @@ int main() {
 	adc_init();
 	adc_gpio_init(25);
 	adc_select_input(0);
+	absolute_time_t start = get_absolute_time();
+	absolute_time_t end;
+
+	gpio_set_pulls(25, false, false);
 
 	while(true) {
 		//xbee_api_get_name();
 
-		uint16_t number = adc_read();
+		uint64_t total = 0;
+		uint32_t count = 0;
+
+		// Average all samples over the one-second interval
+		do {
+			total += adc_read();
+			count++;
+		} while(absolute_time_diff_us(start, (end = get_absolute_time())) < 1000000);
+		start = end; //Update the start time for the next iteration
+
+		float average = ((float) total) / count;
+
+		float temp_F = compute_temperature(compute_resistance(average));
+
+		printf("The temperature is %.02fF \n", temp_F);
+		int16_t number = (int16_t)(temp_F * 10);
 
 		char data[2];
 		data[0] = 0xFF & (number >> 8);
