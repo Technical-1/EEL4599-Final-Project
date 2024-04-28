@@ -62,8 +62,8 @@ int main() {
 	adc_init();
 	adc_gpio_init(25);
 	adc_select_input(0);
-	absolute_time_t start = get_absolute_time();
-	absolute_time_t end;
+	volatile uint64_t start = time_us_64();
+	volatile uint64_t end, diff;
 
 	gpio_set_pulls(25, false, false);
 
@@ -77,14 +77,16 @@ int main() {
 		do {
 			total += adc_read();
 			count++;
-		} while(absolute_time_diff_us(start, (end = get_absolute_time())) < 1000000);
+			end = time_us_64();
+			diff = end - start;
+		} while(diff < (uint64_t)40000000);
 		start = end; //Update the start time for the next iteration
 
 		float average = ((float) total) / count;
 
 		float temp_F = compute_temperature(compute_resistance(average));
 
-		printf("The temperature is %.02fF \n", temp_F);
+		printf("The temperature is %.02fF\n", temp_F);
 		int16_t number = (int16_t)(temp_F * 10);
 
 		char data[2];
@@ -92,7 +94,6 @@ int main() {
 		data[1] = 0xFF & (number >> 0);
 		xbee_api_transmit_data(data, 2, 0x00000000);
 
-		sleep_ms(1000);
 		//tight_loop_contents();
 	}
 }
