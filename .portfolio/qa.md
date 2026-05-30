@@ -62,8 +62,8 @@ The receive path reads the length bytes first and grows its buffer with `realloc
 ### How does a sensor reading get from a node to the cloud?
 The node samples its sensor, packs the value into a 2-byte payload, wraps it in an XBee `0x10` transmit frame, and sends it over the radio. The coordinator receives it as a `0x90` packet, extracts the 2 bytes, and issues an HTTP GET to ThingSpeak's `/update` endpoint with the value in a field parameter.
 
-### Why is the same `xbee_api.h` copied into multiple node folders?
-So each firmware can pair the protocol code with its own `xbee_api_uart_write`/`xbee_api_uart_getchar` implementation. The header has no platform dependencies of its own — the including file supplies the UART backend before the `#include`.
+### Why does each node folder have its own `xbee_api.h`?
+There's actually only one real file — `TempNode/xbee_api.h` and `LightNode/xbee_api.h` are symlinks to `XBeeAPI/xbee_api.h`. That lets each firmware `#include "xbee_api.h"` locally and pair it with its own `xbee_api_uart_write`/`xbee_api_uart_getchar` implementation, while keeping a single source of truth for the frame format. The header has no platform dependencies of its own — the including file supplies the UART backend before the `#include`.
 
 ### How is the temperature actually computed?
 ADC counts → resistance via the voltage divider, then resistance → temperature via the B-parameter equation (B = 3435, R₀ = 10 kΩ at 25 °C), converted to Fahrenheit. Readings are oversampled and averaged over a fixed interval before transmission.
@@ -71,8 +71,8 @@ ADC counts → resistance via the voltage divider, then resistance → temperatu
 ### Why send `734` instead of `73.4`?
 Fixed-point integers are smaller and unambiguous on the wire. The receiver divides by 10 to recover the decimal value, avoiding floating-point transmission and variable-length strings.
 
-### Why is the repository split across so many branches?
-Each branch is one component of the network — temp node, light node, the XBee library, the base station, the schematics. The firmwares use different build systems (Pico SDK/CMake vs Arduino IDE), so keeping them separate avoided toolchain and build-artifact collisions during parallel development.
+### How is the repository organized?
+One directory per network component — `BaseStation/`, `FeatherWingFiles/` (coordinator), `TempNode/`, `LightNode/`, `XBeeAPI/`, `SerialReader/`, and `Diagrams/`. The firmwares use different build systems (Pico SDK/CMake vs Arduino IDE), so each keeps its own build config alongside its source.
 
 ### Where do WiFi credentials and the API key live?
 Out of the repo. The base station includes a git-ignored `WiFiCredentials.h`, and the CircuitPython coordinator reads from a `secrets` module — neither is committed.

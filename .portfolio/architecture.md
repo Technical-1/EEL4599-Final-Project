@@ -30,7 +30,7 @@ flowchart LR
 
 ### XBee API frame library
 - **Purpose**: Encode and decode XBee API-mode frames so firmware never hand-assembles raw byte buffers.
-- **Location**: `XBeeAPI/xbee_api.h` (also vendored into `TempNode/` and `LightNode/`)
+- **Location**: `XBeeAPI/xbee_api.h` (symlinked from `TempNode/xbee_api.h` and `LightNode/xbee_api.h`, so all nodes share one copy)
 - **Key responsibilities**: build AT command frames (`0x08`), transmit-request frames (`0x10`), and parse receive packets (`0x90`); compute and verify the XBee checksum; grow the frame buffer with `realloc` as needed. All UART I/O is delegated to two functions the host firmware must provide: `xbee_api_uart_write()` and `xbee_api_uart_getchar()`.
 
 ### Temperature node
@@ -85,7 +85,7 @@ flowchart LR
 - **Decision**: Encode each reading as a 2-byte `int16` scaled by 10 (e.g. 73.4 °F → `734`) and reconstruct on the receiver.
 - **Rationale**: Keeps payloads to 2 bytes with predictable framing and no parsing ambiguity, versus sending variable-length ASCII like `"73.4F"`.
 
-### Branch-per-node repository structure
-- **Context**: Two developers building several distinct firmware images plus schematics for one networked system.
-- **Decision**: Keep each node and the shared library on its own branch rather than one monolithic tree.
-- **Rationale**: Each firmware has its own build system (CMake vs Arduino IDE) and flashing target; isolating them kept build artifacts and toolchain configs from colliding during parallel development.
+### Shared protocol library via symlinks
+- **Context**: Three firmwares (the two Pico C targets and the Arduino node) each need the XBee frame code, but duplicating the header invites the copies to drift apart.
+- **Decision**: Keep one real `XBeeAPI/xbee_api.h` and point `TempNode/xbee_api.h` and `LightNode/xbee_api.h` at it with symlinks, so each firmware still `#include "xbee_api.h"` locally but compiles the same bytes.
+- **Rationale**: Guarantees one source of truth for the wire format across boards with different build systems (CMake vs Arduino IDE), without a build step to copy files around. The alternative — committing three independent copies — is exactly how the temp and light nodes briefly diverged during parallel development before being unified.

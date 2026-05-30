@@ -29,19 +29,24 @@ This was a two-person final project for EEL4599. My focus was the **base-station
 - **Build**: Pico SDK (CMake) for the Pico targets; Arduino IDE for the Arduino/ESP targets
 - **Hardware design**: KiCad schematics for each node
 
-## Repository layout
+## Project Structure
 
-This repo uses one branch per network component:
+Each network component lives in its own directory:
 
-| Branch        | Component                                                        |
-|---------------|-----------------------------------------------------------------|
-| `BaseStation` | ESP8266 base station: WiFi connect + OLED status                |
-| `kanfer`      | CircuitPython coordinator that forwards XBee data to ThingSpeak |
-| `TempNode`    | Pico thermistor node (C, Pico SDK)                              |
-| `LightNode`   | Arduino luminosity node                                         |
-| `XBeeAPI`     | Standalone XBee API frame library + reference firmware          |
-| `SerialReader`| Host-side C tool that decodes XBee frames from a serial port    |
-| `Diagrams`    | KiCad schematics and the data-flow diagram                      |
+```
+EEL4599-Final-Project/
+├── BaseStation/        # ESP8266 base station: WiFi connect + OLED status
+├── FeatherWingFiles/   # CircuitPython coordinator that forwards XBee data to ThingSpeak
+├── TempNode/           # Pico thermistor node (C, Pico SDK)
+├── LightNode/          # Arduino luminosity node
+├── XBeeAPI/            # XBee API frame library (xbee_api.h) + reference firmware
+├── SerialReader/       # Host-side C tool that decodes XBee frames from a serial port
+├── Diagrams/           # KiCad schematics and the data-flow diagram
+├── ReceiveData.py      # Host-side digi-xbee receive tool
+└── .portfolio/         # Project documentation
+```
+
+The three sensor/reference firmwares share one protocol implementation: `TempNode/xbee_api.h` and `LightNode/xbee_api.h` are **symlinks** to `XBeeAPI/xbee_api.h`, so there is a single source of truth for the frame format.
 
 ## Getting Started
 
