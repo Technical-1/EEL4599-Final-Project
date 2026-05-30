@@ -193,7 +193,7 @@ void xbee_api_transmit_data(char* data, uint16_t data_len, uint64_t address) {
 
 	bool success;
 
-	success = xbee_api_read_api_packet();
+	success = true; //xbee_api_read_api_packet();
 
 	if(!success) {
 		printf("Could not read response packet\n");
