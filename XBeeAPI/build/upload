@@ -1,0 +1,3 @@
+#!/bin/sh
+sudo mount $(sudo fdisk -l | grep 128M | grep W95 | awk '{print $1}') /mnt/ram/drive -o uid=1000
+cp main.uf2 /mnt/ram/drive
